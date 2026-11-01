@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const os = require("os");
+const config = require("../config.js");
 const { exec } = require("child_process");
 
 function execCommand(command, cwd) {
@@ -31,7 +31,8 @@ async function cloneRepositoryFull(repoUrl) {
     throw new Error("Input must be a GitHub URL");
   }
 
-  const tmpFolder = fs.mkdtempSync(path.join(os.tmpdir(), "gitmetrics-"));
+  fs.mkdirSync(config.tempDir, { recursive: true });
+  const tmpFolder = fs.mkdtempSync(path.join(config.tempDir, "gitmetrics-"));
 
   console.log("Cloning repository for Git metrics...");
   console.log("Repo:", repoUrl);
@@ -45,15 +46,9 @@ async function cloneRepositoryFull(repoUrl) {
 
 function runPythonGitMetrics(repoPath, outputPath, options = {}) {
   return new Promise((resolve, reject) => {
-    const pythonCommand = process.env.PYTHON_CMD || "python";
+    const pythonCommand = config.pythonCommand;
 
-    const scriptPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "processing",
-      "git_metrics.py"
-    );
+    const scriptPath = path.join(config.processingDir, "git_metrics.py");
 
     let command = `"${pythonCommand}" "${scriptPath}" --repo "${repoPath}" --out "${outputPath}"`;
 
@@ -94,7 +89,7 @@ async function analyzeGitMetrics(repoUrl, options = {}) {
   try {
     repoPath = await cloneRepositoryFull(repoUrl);
 
-    const resultsDir = path.join(__dirname, "..", "results");
+    const resultsDir = config.resultsDir;
 
     if (!fs.existsSync(resultsDir)) {
       fs.mkdirSync(resultsDir, { recursive: true });

@@ -1,0 +1,14 @@
+.git
+**/node_modules
+**/.env
+**/.env.*
+**/*.env
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/dist
+**/*.log
+backend/results
+backend/tmp
+frontend
+database

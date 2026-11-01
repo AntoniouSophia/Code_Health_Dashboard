@@ -1,12 +1,14 @@
 // services/allincodeAuthService.js
 
+const config = require("../config.js");
+
 async function loginToAllinCode() {
   const body = new URLSearchParams();
 
-  body.append("email", process.env.ALLINCODE_EMAIL);
-  body.append("password", process.env.ALLINCODE_PASSWORD);
+  body.append("email", config.allincodeEmail);
+  body.append("password", config.allincodePassword);
 
-  const response = await fetch(`${process.env.ALLINCODE_BASE_URL}/login`, {
+  const response = await fetch(`${config.allincodeBaseUrl}/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",

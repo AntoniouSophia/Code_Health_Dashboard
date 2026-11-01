@@ -1,0 +1,127 @@
+# Four-service local test. SonarQube uses embedded H2 (evaluation only).
+services:
+  db:
+    image: ${MARIADB_IMAGE:?Set MARIADB_IMAGE in the root .env}
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME:?Set DB_NAME}
+      MARIADB_USER: ${DB_USER:?Set DB_USER to a non-root application user}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+      - type: bind
+        source: ${SQL_INIT_FILE:?Set SQL_INIT_FILE}
+        target: /docker-entrypoint-initdb.d/01-application.sql
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  sonarqube:
+    image: ${SONARQUBE_IMAGE:?Set SONARQUBE_IMAGE}
+    environment:
+      SONAR_WEB_PORT: ${SONAR_PORT:?Set SONAR_PORT}
+    ports:
+      - "${BIND_ADDRESS:?Set BIND_ADDRESS}:${SONAR_HOST_PORT:?Set SONAR_HOST_PORT}:${SONAR_PORT}"
+    volumes:
+      - sonar_data:/opt/sonarqube/data
+      - sonar_extensions:/opt/sonarqube/extensions
+      - sonar_logs:/opt/sonarqube/logs
+      - sonar_temp:/opt/sonarqube/temp
+    ulimits:
+      nofile:
+        soft: 131072
+        hard: 131072
+      nproc: 8192
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          curl --fail --silent --show-error
+          "http://127.0.0.1:$${SONAR_WEB_PORT}/api/system/status"
+          | grep -Eq '"status"[[:space:]]*:[[:space:]]*"UP"'
+      interval: 15s
+      timeout: 10s
+      retries: 40
+      start_period: 120s
+
+  backend:
+    image: code_health_dashboard
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    init: true
+    environment:
+      PORT: ${PORT:?Set PORT}
+      DB_HOST: ${DB_HOST:?Set DB_HOST}
+      DB_PORT: ${DB_PORT:?Set DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      SONAR_URL: ${SONAR_URL:?Set SONAR_URL}
+      SONAR_TOKEN: ${SONAR_TOKEN:-}
+      SONAR_SCANNER_HOME: ${SONAR_SCANNER_HOME:?Set SONAR_SCANNER_HOME}
+      SONAR_POLL_INTERVAL_MS: ${SONAR_POLL_INTERVAL_MS:?Set SONAR_POLL_INTERVAL_MS}
+      SONAR_ANALYSIS_TIMEOUT_MS: ${SONAR_ANALYSIS_TIMEOUT_MS:?Set SONAR_ANALYSIS_TIMEOUT_MS}
+      ALLINCODE_BASE_URL: ${ALLINCODE_BASE_URL:-}
+      ALLINCODE_EMAIL: ${ALLINCODE_EMAIL:-}
+      ALLINCODE_PASSWORD: ${ALLINCODE_PASSWORD:-}
+      ALLINCODE_POLL_INTERVAL_MS: ${ALLINCODE_POLL_INTERVAL_MS:?Set ALLINCODE_POLL_INTERVAL_MS}
+      ALLINCODE_ANALYSIS_TIMEOUT_MS: ${ALLINCODE_ANALYSIS_TIMEOUT_MS:?Set ALLINCODE_ANALYSIS_TIMEOUT_MS}
+      ALLINCODE_STEP_STALL_TIMEOUT_MS: ${ALLINCODE_STEP_STALL_TIMEOUT_MS:?Set ALLINCODE_STEP_STALL_TIMEOUT_MS}
+      PYTHON_CMD: ${PYTHON_CMD:?Set PYTHON_CMD}
+      PROCESSING_DIR: ${PROCESSING_DIR:?Set PROCESSING_DIR}
+      RESULTS_DIR: ${RESULTS_DIR:?Set RESULTS_DIR}
+      TEMP_DIR: ${TEMP_DIR:?Set TEMP_DIR}
+    ports:
+      - "${BIND_ADDRESS}:${BACKEND_HOST_PORT:?Set BACKEND_HOST_PORT}:${PORT}"
+    volumes:
+      - backend_results:${RESULTS_DIR}
+    depends_on:
+      db:
+        condition: service_healthy
+      sonarqube:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:' + process.env.PORT + '/api/projects',
+          {signal: AbortSignal.timeout(4000)})
+          .then(r => {if (!r.ok) process.exit(1)})
+          .catch(() => process.exit(1))
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  frontend:
+    image: code_health_dashboard_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    init: true
+    environment:
+      VITE_API_URL: ${VITE_API_URL:?Set VITE_API_URL}
+      VITE_DEV_HOST: ${VITE_DEV_HOST:?Set VITE_DEV_HOST}
+      VITE_DEV_PORT: ${VITE_DEV_PORT:?Set VITE_DEV_PORT}
+    ports:
+      - "${BIND_ADDRESS}:${FRONTEND_HOST_PORT:?Set FRONTEND_HOST_PORT}:${VITE_DEV_PORT}"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  db_data:
+  backend_results:
+  sonar_data:
+  sonar_extensions:
+  sonar_logs:
+  sonar_temp:

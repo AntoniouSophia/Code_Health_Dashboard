@@ -28,12 +28,12 @@ async function getProjectsWithLatestRun() {
           ROW_NUMBER() OVER (
             PARTITION BY ar.project_id
             ORDER BY ar.run_date DESC, ar.id DESC
-          ) AS row_number
+          ) AS latest_run_rank
 
         FROM analysis_runs ar
       ) ranked_runs
 
-      WHERE ranked_runs.row_number = 1
+      WHERE ranked_runs.latest_run_rank = 1
     ) latest_run
       ON latest_run.project_id = p.id
 

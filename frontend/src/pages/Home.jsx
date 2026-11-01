@@ -9,8 +9,7 @@ import {
 
 import "./Home.css";
 
-const API_BASE =
-  "http://localhost:3000";
+import { API_BASE } from "../config.js";
 
 function Home() {
   const navigate = useNavigate();

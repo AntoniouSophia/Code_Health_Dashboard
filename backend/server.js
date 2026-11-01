@@ -1,6 +1,6 @@
 // server.js (CommonJS)
 
-require ("dotenv").config();
+const config = require("./config.js");
 
 const express = require("express");
 const cors = require("cors");
@@ -826,7 +826,7 @@ app.get("/api/projects", async (req, res) => {
     });
   }
 });
-const PORT = 3000;
+const PORT = config.port;
 
 app.get(
   "/api/analysis-runs/:analysisRunId",
@@ -862,5 +862,5 @@ app.get(
 );
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server listening on port ${PORT}`);
 });

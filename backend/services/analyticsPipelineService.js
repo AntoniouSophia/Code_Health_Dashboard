@@ -1,20 +1,15 @@
 const fs = require("fs");
 const path = require("path");
+const config = require("../config.js");
 const { execFile } = require("child_process");
 
 function runAnalyticsPipeline(inputData) {
   return new Promise((resolve, reject) => {
-    const pythonCommand = process.env.PYTHON_CMD || "python";
+    const pythonCommand = config.pythonCommand;
 
-    const scriptPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "processing",
-      "analytics_pipeline.py"
-    );
+    const scriptPath = path.join(config.processingDir, "analytics_pipeline.py");
 
-    const resultsDir = path.join(__dirname, "..", "results");
+    const resultsDir = config.resultsDir;
 
     if (!fs.existsSync(resultsDir)) {
       fs.mkdirSync(resultsDir, { recursive: true });

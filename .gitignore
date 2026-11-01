@@ -26,3 +26,18 @@ dist-ssr
 
 
 .env
+
+# Local environment files; templates are safe to commit
+.env.*
+!.env.example
+# Generated analysis data
+backend/results/
+backend/tmp/
+
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+
+.venv/
