@@ -600,8 +600,8 @@ def calculate_complexity_score(item, p95_values):
     )
 
     return (
-        0.60 * normalized_sonar_complexity +
-        0.40 * normalized_sonar_cognitive_complexity
+        0.50 * normalized_sonar_complexity +
+        0.50 * normalized_sonar_cognitive_complexity
     ) * 100
 
 
@@ -647,8 +647,8 @@ def calculate_quality_risk_score(item, p95_values):
     )
 
     return (
-        0.60 * normalized_code_smells +
-        0.40 * normalized_bugs
+        0.50 * normalized_code_smells +
+        0.50 * normalized_bugs
     ) * 100
 
 
@@ -1064,8 +1064,8 @@ def calculate_project_scores(project_metrics, merged_file_metrics):
     )
 
     complexity_project_risk = (
-        0.60 * complexity_density_risk +
-        0.40 * cognitive_complexity_density_risk
+        0.50 * complexity_density_risk +
+        0.50 * cognitive_complexity_density_risk
     )
 
     # Quality project risk
@@ -1085,8 +1085,8 @@ def calculate_project_scores(project_metrics, merged_file_metrics):
     )
 
     quality_project_risk = (
-        0.60 * code_smells_risk +
-        0.40 * bugs_risk
+        0.50 * code_smells_risk +
+        0.50 * bugs_risk
     )
 
 
