@@ -367,3 +367,59 @@ Open the address displayed by Vite, usually `http://localhost:5173`. Both termin
 | `DB_ROOT_PASSWORD` | MariaDB administrator password |
 | `SQL_INIT_FILE` | SQL file used for first-time initialization |
 | `SONAR_PORT` | Internal SonarQube port |
+
+## Application Walkthrough
+
+### 1. Home Page
+
+The home page allows users to submit a GitHub repository URL to start a new analysis or access previously analyzed projects.
+
+![Home Page](images/home.png)
+
+### 2. Project Overview
+
+The dashboard provides an overview of the project's software health, including key metrics, risk breakdown, and critical issues.
+
+![Project Overview](images/overview.png)
+
+### 3. Temporal Evolution
+
+The temporal evolution section shows how technical debt changes over time, including estimated debt and associated costs.
+
+![Temporal Evolution](images/temporal-evolution.png)
+
+### 4. High-TD Risk Files
+
+Files with a high probability of technical debt are highlighted alongside their corresponding risk levels.
+
+![High-TD Risk Files](images/high-td-risk.png)
+
+### 5. Hotspots
+
+The Hotspots view identifies files that combine high complexity and Git activity (hotspots), indicating areas that may require closer attention.
+
+![Hotspots](images/hotspots.png)
+
+### 6. Refactoring Priority
+
+The Refactoring Priority Score (RPS) is used to rank files in a table and identify potential refactoring candidates.
+
+![Refactoring Priority](images/refactoring-priority.png)
+
+### 7. Quality & Structure
+
+The Quality & Structure section Highlights files with the highest quality risk scores and shows the distribution of structural risk across files.
+
+![Quality & Structure](images/quality-structure.png)
+
+### 8. Structural Issues per File
+
+A color-coded table allows users to examine structural metrics and risk scores for individual files.
+
+![Structural Issues per File](images/structural-issues.png)
+
+### 9. All File Metrics
+
+Users can search, filter, and compare detailed file-level metrics across different categories.
+
+![All File Metrics](images/all-file-metrics.png)
